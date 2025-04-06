@@ -2,6 +2,11 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import time
+import torch.quantization as tq
+from torch.ao.quantization.quantize_fx import prepare_fx, convert_fx, QConfigMapping
+from torch.ao.quantization.observer import PlaceholderObserver
+from torch.ao.quantization import PerChannelMinMaxObserver, HistogramObserver
+import copy
 
 
 def evaluate_model(model: torch.nn.Module, data_loader: DataLoader, model_name: str,
@@ -85,3 +90,63 @@ def evaluate_model(model: torch.nn.Module, data_loader: DataLoader, model_name: 
         "true_labels": true_labels,
         "predicted_labels": predicted_labels
     }
+
+
+def quant_model_prep(example_input: tuple[torch.Tensor], model: torch.nn.Module, qconfig_mapping: QConfigMapping):
+    return prepare_fx(
+        copy.deepcopy(model),
+        qconfig_mapping,
+        example_input
+    )
+
+
+def dynamic_quantization(model: torch.nn.Module, example_input: tuple[torch.Tensor]):
+    if not model.training:
+        model.eval()
+    dynamic_qconfig = tq.QConfig(
+        activation=PlaceholderObserver.with_args(
+            dtype=torch.quint8,
+            quant_min=0,
+            quant_max=255,
+            is_dynamic=True
+        ),
+        weight=PerChannelMinMaxObserver.with_args(
+            dtype=torch.qint8,
+            qscheme=torch.per_channel_symmetric
+        )
+    )
+    qconfig_mapping = QConfigMapping()
+    qconfig_mapping.set_global(dynamic_qconfig)
+    quantized_model = convert_fx(quant_model_prep(example_input, model, qconfig_mapping))
+    return quantized_model
+
+
+def stat_quant_calibration(model: torch.fx.GraphModule, data_loader: DataLoader):
+    if not model.training:
+        model.eval()
+    with torch.no_grad(), tqdm(total=len(data_loader)) as pbar:
+        for image, target in data_loader:
+            model(image)
+            pbar.update(1)
+    return model
+
+
+def static_quantization(model: torch.nn.Module, example_input: tuple[torch.Tensor], calibration_data: DataLoader):
+    custom_config = tq.QConfig(
+        activation=HistogramObserver.with_args(
+            reduce_range=False
+        ),
+        weight=PerChannelMinMaxObserver.with_args(
+            dtype=torch.qint8,
+            qscheme=torch.per_channel_symmetric
+        )
+    )
+    qconfig_mapping = QConfigMapping() \
+        .set_global(custom_config) \
+        .set_object_type(torch.nn.Conv2d, custom_config) \
+        .set_object_type(torch.nn.Linear, custom_config) \
+        .set_object_type(torch.nn.ReLU, custom_config)
+
+    stat_quant_prep_mod = quant_model_prep(example_input, model, qconfig_mapping)
+    stat_quant_prep_mod = stat_quant_calibration(stat_quant_prep_mod, calibration_data)
+    return convert_fx(stat_quant_prep_mod)
