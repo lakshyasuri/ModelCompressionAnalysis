@@ -15,7 +15,7 @@ class LeNet5(torch.nn.Module):
         x = torch.nn.functional.max_pool2d(x, 2)
         x = torch.nn.functional.relu(self.conv2(x))
         x = torch.nn.functional.max_pool2d(x, 2)
-        x = x.view(x.size(0), -1)
+        x = x.reshape(x.size(0), -1)
         x = torch.nn.functional.relu(self.fc1(x))
         x = torch.nn.functional.relu(self.fc2(x))
         x = self.fc3(x)
