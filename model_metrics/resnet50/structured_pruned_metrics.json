@@ -1,0 +1,34 @@
+{
+    "baseline": {
+        "categorical_crossentropy": 1.6259361061096191,
+        "top1_accuracy": 0.6243,
+        "top5_accuracy": 0.8429,
+        "model_size_MB": 95.993338,
+        "inference_time_per_batch_sec": 0.01288914680480957,
+        "batch_size": 32
+    },
+    "structured_20%_prune": {
+        "categorical_crossentropy": 1.5222960329055786,
+        "top1_accuracy": 0.6196,
+        "top5_accuracy": 0.847,
+        "model_size_MB": 63.387134,
+        "inference_time_per_batch_sec": 0.037148237228393555,
+        "batch_size": 32
+    },
+    "structured_30%_prune": {
+        "categorical_crossentropy": 1.576888065624237,
+        "top1_accuracy": 0.6374,
+        "top5_accuracy": 0.8598,
+        "model_size_MB": 49.913278,
+        "inference_time_per_batch_sec": 0.03553581237792969,
+        "batch_size": 32
+    },
+    "structured_50%_prune": {
+        "categorical_crossentropy": 1.7554291449546815,
+        "top1_accuracy": 0.5634,
+        "top5_accuracy": 0.8203,
+        "model_size_MB": 29.62195,
+        "inference_time_per_batch_sec": 0.03809094429016113,
+        "batch_size": 32
+    }
+}

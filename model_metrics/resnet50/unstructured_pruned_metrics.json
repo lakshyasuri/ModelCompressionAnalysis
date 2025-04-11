@@ -1,0 +1,50 @@
+{
+    "baseline": {
+        "categorical_crossentropy": 1.6259361061096191,
+        "top1_accuracy": 0.6243,
+        "top5_accuracy": 0.8429,
+        "model_size_MB": 95.993338,
+        "inference_time_per_batch_sec": 0.01288914680480957,
+        "batch_size": 32
+    },
+    "magnitude_30%_prune": {
+        "categorical_crossentropy": 1.7548841632843017,
+        "top1_accuracy": 0.5905,
+        "top5_accuracy": 0.8195,
+        "model_size_MB": 96.015906,
+        "inference_time_per_batch_sec": 0.06436419486999512,
+        "batch_size": 32
+    },
+    "magnitude_50%_prune": {
+        "categorical_crossentropy": 1.7398537705421449,
+        "top1_accuracy": 0.5746,
+        "top5_accuracy": 0.7943,
+        "model_size_MB": 95.98997,
+        "inference_time_per_batch_sec": 0.07499194145202637,
+        "batch_size": 32
+    },
+    "gradient_20%_prune": {
+        "categorical_crossentropy": 1.5041504439353943,
+        "top1_accuracy": 0.6276,
+        "top5_accuracy": 0.8452,
+        "model_size_MB": 95.993338,
+        "inference_time_per_batch_sec": 0.05988907814025879,
+        "batch_size": 32
+    },
+    "gradient_30%_prune": {
+        "categorical_crossentropy": 1.5017813158035278,
+        "top1_accuracy": 0.6329,
+        "top5_accuracy": 0.8474,
+        "model_size_MB": 95.993338,
+        "inference_time_per_batch_sec": 0.06070208549499512,
+        "batch_size": 32
+    },
+    "gradient_50%_prune": {
+        "categorical_crossentropy": 1.4922787067122185,
+        "top1_accuracy": 0.6610,
+        "top5_accuracy": 0.8686,
+        "model_size_MB": 95.58959,
+        "inference_time_per_batch_sec": 0.06593248549499512,
+        "batch_size": 32
+    }
+}

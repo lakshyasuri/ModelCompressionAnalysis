@@ -1,0 +1,50 @@
+{
+    "baseline": {
+        "model": "ResNet50",
+        "top1_acc": 0.6681,
+        "top5_acc": 0.8653,
+        "cross_entropy_loss": 4642.5144,
+        "inference_time": 445.17,
+        "size": 96.017522
+    },
+    "baseline_dy_quant": {
+        "model": "ResNet50",
+        "top1_acc": 0.6675,
+        "top5_acc": 0.865,
+        "cross_entropy_loss": 4640.8774,
+        "inference_time": 428.43,
+        "size": 94.425866
+    },
+    "baseline_st_quant": {
+        "model": "ResNet50",
+        "top1_acc": 0.5756,
+        "top5_acc": 0.7931,
+        "cross_entropy_loss": 6049.9059,
+        "inference_time": 117.04,
+        "size": 24.0581
+    },
+    "Struct_unstruct_prun": {
+        "model": "ResNet50",
+        "top1_acc": 0.6594,
+        "top5_acc": 0.8803,
+        "cross_entropy_loss": 4800.8004,
+        "inference_time": 344.0,
+        "size": 49.91723
+    },
+    "Struct_unstruct_prun_dy_quant": {
+        "model": "ResNet50",
+        "top1_acc": 0.6591,
+        "top5_acc": 0.8803,
+        "cross_entropy_loss": 4801.9895,
+        "inference_time": 380.61,
+        "size": 48.759898
+    },
+    "Struct_unstruct_prun_st_quant": {
+        "model": "ResNet50",
+        "top1_acc": 0.6112,
+        "top5_acc": 0.8313,
+        "cross_entropy_loss": 5898.6725,
+        "inference_time": 87.6,
+        "size": 12.52635
+    }
+}

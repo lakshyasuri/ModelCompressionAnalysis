@@ -1,6 +1,6 @@
 {
- "top1_acc": 0.67890625,
- "top5_acc": 0.8640625,
+ "top1_acc": 0.6318,
+ "top5_acc": 0.8495,
  "total_inference_time": 179.36567187309265,
  "average_inference_time": 8.968283593654633,
  "average_loss": 92.06193466186524,
