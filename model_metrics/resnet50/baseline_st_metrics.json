@@ -1,0 +1,13 @@
+{
+ "top1_acc": 0.68828125,
+ "top5_acc": 0.86640625,
+ "total_inference_time": 40.570319175720215,
+ "average_inference_time": 2.0285159587860107,
+ "average_loss": 90.5962652206421,
+ "total_batches": 20,
+ "all_losses": [],
+ "all_top1_acc": [],
+ "inference_times": [],
+ "true_labels": [],
+ "predicted_labels": []
+}

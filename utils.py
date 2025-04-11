@@ -77,11 +77,13 @@ def evaluate_model(model: torch.nn.Module, data_loader: DataLoader, model_name: 
         new_last_loss = loss.item() * labels.size(0) / batch_size
         total_loss -= loss.item()
         total_loss += new_last_loss
+    total_inference_time = end_time - start_time
 
     return {
         "top1_acc": top1_correct / total_samples,
         "top5_acc": top5_correct / total_samples,
-        "total_inference_time": (end_time - start_time),
+        "total_inference_time": total_inference_time,
+        "average_inference_time": total_inference_time / i,
         "average_loss": total_loss / i,
         "total_batches": i,
         "all_losses": all_losses,
