@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchmetrics
 import lightning as L
-from sparseml.pytorch.optim import ScheduledModifierManager
+# from sparseml.pytorch.optim import ScheduledModifierManager
 
 
 class ResNet50Baseline(torch.nn.Module):
@@ -84,9 +84,9 @@ class StructuredThenSparseResNet50(L.LightningModule):
         self.recipe_path = recipe_path
         self.manager = None
 
-        if recipe_path:
-            self.manager = ScheduledModifierManager.from_yaml(recipe_path)
-            self.manager.initialize(self.model, optimizer=None)  # Attach optimizer later
+        # if recipe_path:
+        #     self.manager = ScheduledModifierManager.from_yaml(recipe_path)
+        #     self.manager.initialize(self.model, optimizer=None)  # Attach optimizer later
 
     def forward(self, x):
         return self.model(x)
