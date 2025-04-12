@@ -1,0 +1,1 @@
+The link towards the apk is: https://drive.google.com/file/d/1VJokvN7tphwYrMaNOsTfNA85vgBnDLWW/view?usp=sharing
