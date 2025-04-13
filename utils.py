@@ -7,8 +7,10 @@ from torch.ao.quantization.quantize_fx import prepare_fx, convert_fx, QConfigMap
 from torch.ao.quantization.observer import PlaceholderObserver
 from torch.ao.quantization import PerChannelMinMaxObserver, HistogramObserver
 import copy
-
-
+import torch.nn.utils.prune as prune
+import torch_pruning as tp
+import torch.nn as nn
+from torchvision import datasets, transforms
 def evaluate_model(model: torch.nn.Module, data_loader: DataLoader, model_name: str,
                    batches: int = None, high_granularity=False):
     device = torch.device("cpu")
@@ -152,3 +154,80 @@ def static_quantization(model: torch.nn.Module, example_input: tuple[torch.Tenso
     stat_quant_prep_mod = quant_model_prep(example_input, model, qconfig_mapping)
     stat_quant_prep_mod = stat_quant_calibration(stat_quant_prep_mod, calibration_data)
     return convert_fx(stat_quant_prep_mod)
+
+def unstructured_prune(model, sparsity=0.3, layer_scope="both"):
+    """
+    Applies unstructured magnitude-based pruning to Conv2d and/or Linear layers.
+    """
+    device = torch.device("cpu")
+    model = model.to(device)
+    for name, module in model.named_modules():
+        if isinstance(module, nn.Conv2d) and layer_scope in ["conv", "both"]:
+            prune.l1_unstructured(module, name='weight', amount=sparsity)
+            prune.remove(module, 'weight')
+        elif isinstance(module, nn.Linear) and layer_scope in ["fc", "both"]:
+            prune.l1_unstructured(module, name='weight', amount=sparsity)
+            prune.remove(module, 'weight')
+    return model
+
+# for structured taylor 
+def get_train_loader(batch_size=64):
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
+    train_dataset = datasets.MNIST('./data', train=True, download=True, transform=transform)
+    return DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    
+def structured_prune(
+    model,
+    method="magnitude",
+    sparsity=0.3,
+    layer_scope="both",
+    example_input=torch.randn(1, 1, 28, 28)
+):
+    """
+    Applies structured pruning using Torch-Pruning library.
+    """
+    device = torch.device("cpu")
+    model = model.to(device)
+
+    # === Set importance
+    if method == "magnitude":
+        importance = tp.importance.GroupMagnitudeImportance(p=2)
+    elif method == "taylor":
+        train_loader = get_train_loader()
+        importance = tp.importance.GroupTaylorImportance()
+        model.train()
+        images, labels = next(iter(train_loader))
+        images, labels = images.to(device), labels.to(device)
+        loss = nn.CrossEntropyLoss()(model(images), labels)
+        loss.backward()
+        model.eval()
+    else:
+        raise ValueError("Unsupported method. Use 'magnitude' or 'taylor'.")
+
+    # === Layer filtering
+    ignored_layers = []
+    for m in model.modules():
+        if isinstance(m, nn.Linear) and m.out_features == 10:
+            ignored_layers.append(m)
+        if layer_scope == "conv" and isinstance(m, nn.Linear):
+            ignored_layers.append(m)
+        if layer_scope == "fc" and isinstance(m, nn.Conv2d):
+            ignored_layers.append(m)
+
+    # === Prune
+    pruner = tp.pruner.BasePruner(
+        model,
+        example_input,
+        importance=importance,
+        pruning_ratio=sparsity,
+        ignored_layers=ignored_layers,
+        round_to=1
+    )
+    tp.utils.print_tool.before_pruning(model)
+    pruner.step()
+    tp.utils.print_tool.after_pruning(model)
+
+    return model
