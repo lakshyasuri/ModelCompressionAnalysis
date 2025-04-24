@@ -4,3 +4,4 @@ tqdm
 torchmetrics
 lightning
 ipykernel
+requests

@@ -1,3 +1,4 @@
+import shutil
 import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -11,6 +12,11 @@ import torch.nn.utils.prune as prune
 import torch_pruning as tp
 import torch.nn as nn
 from torchvision import datasets, transforms
+import requests
+import zipfile
+import os
+
+
 def evaluate_model(model: torch.nn.Module, data_loader: DataLoader, model_name: str,
                    batches: int = None, high_granularity=False):
     device = torch.device("cpu")
@@ -155,6 +161,7 @@ def static_quantization(model: torch.nn.Module, example_input: tuple[torch.Tenso
     stat_quant_prep_mod = stat_quant_calibration(stat_quant_prep_mod, calibration_data)
     return convert_fx(stat_quant_prep_mod)
 
+
 def unstructured_prune(model, sparsity=0.3, layer_scope="both"):
     """
     Applies unstructured magnitude-based pruning to Conv2d and/or Linear layers.
@@ -170,7 +177,8 @@ def unstructured_prune(model, sparsity=0.3, layer_scope="both"):
             prune.remove(module, 'weight')
     return model
 
-# for structured taylor 
+
+# for structured taylor
 def get_train_loader(batch_size=64):
     transform = transforms.Compose([
         transforms.ToTensor(),
@@ -178,13 +186,14 @@ def get_train_loader(batch_size=64):
     ])
     train_dataset = datasets.MNIST('./data', train=True, download=True, transform=transform)
     return DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    
+
+
 def structured_prune(
-    model,
-    method="magnitude",
-    sparsity=0.3,
-    layer_scope="both",
-    example_input=torch.randn(1, 1, 28, 28)
+        model,
+        method="magnitude",
+        sparsity=0.3,
+        layer_scope="both",
+        example_input=torch.randn(1, 1, 28, 28)
 ):
     """
     Applies structured pruning using Torch-Pruning library.
@@ -231,3 +240,55 @@ def structured_prune(
     tp.utils.print_tool.after_pruning(model)
 
     return model
+
+
+class ImageNetDownloader:
+    def __init__(self):
+        self.url = "http://cs231n.stanford.edu/tiny-imagenet-200.zip"
+        self.zip_name = "tiny-imagenet-200.zip"
+        self.output_dir = os.path.dirname(__file__)
+
+    def download_and_extract_data(self):
+        output_path = os.path.join(self.output_dir, self.zip_name)
+        if os.path.isdir(output_path.replace(".zip", "")):
+            print("Data already downloaded and extracted")
+            return
+        elif not os.path.isfile(output_path):
+            response = requests.get(self.url, stream=True)
+            total_size = response.headers.get('content-length', 0)
+            mb_size = 1024
+            with open(output_path, 'wb') as file, tqdm(total=int(total_size), unit='iB', unit_scale=True,
+                                                       desc=output_path) as bar:
+                for data in response.iter_content(mb_size):
+                    file.write(data)
+                    bar.update(len(data))
+
+        print(f"Extracting files {output_path}......")
+        with zipfile.ZipFile(output_path, 'r') as zip_file:
+            zip_file.extractall(os.path.dirname(__file__))
+
+    def setup_validation_data_labels(self):
+        data_dir = os.path.join(self.output_dir, self.zip_name.replace(".zip", ""),
+                                "val", "val_annotations.txt")
+        new_base = os.path.join(self.output_dir, self.zip_name.replace(".zip", ""),
+                                "val", "processed_val_2")
+        if os.path.isdir(new_base):
+            print("processed_val_2 directory already present. No need for pre-processing.")
+            return os.path.join(self.output_dir, self.zip_name.replace(".zip", ""))
+        with open(data_dir, 'r') as f:
+            annotations = f.readlines()
+        annotations = [i.replace("\n", "").split("\t")[0:2] for i in annotations]
+        print(annotations)
+
+        img_base_path = os.path.join(self.output_dir, self.zip_name.replace(".zip", ""),
+                                     "val", "images")
+        labels = set()
+        for ann in annotations:
+            new_dir = os.path.join(new_base, ann[1])
+            if ann[1] not in labels:
+                labels.add(ann[1])
+                os.makedirs(new_dir, exist_ok=True)
+            img_path = os.path.join(img_base_path, ann[0])
+            if os.path.isfile(img_path):
+                shutil.move(str(img_path), str(os.path.join(new_dir, ann[0])))
+        return os.path.join(self.output_dir, self.zip_name.replace(".zip", ""))
