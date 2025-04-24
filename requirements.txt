@@ -3,3 +3,4 @@ torchvision
 tqdm
 torchmetrics
 lightning
+ipykernel
