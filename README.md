@@ -21,9 +21,12 @@ A more detailed explanation of the project is available in the **project_report.
 ### Results
 (Explanation of all the plots is available in the project report)
 - **ResNet50**
+  
   ![image](https://github.com/user-attachments/assets/5b57c404-1d5d-4ac4-b46f-624d34886e5f)
+  
 
 - **LeNet5**
+  
   <img width="868" alt="image" src="https://github.com/user-attachments/assets/4fe3aacf-4164-4f09-af30-b2e8c40cc0f1" />
 
   <img width="868" alt="image" src="https://github.com/user-attachments/assets/892bc8e8-cbfd-4f26-be19-e2088fbf86ca" />
