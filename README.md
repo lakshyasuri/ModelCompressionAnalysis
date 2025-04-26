@@ -14,7 +14,7 @@ The models used for this analysis are:
 
 ### Compression Techniques
 - **Pruning**: Structured, Unstructured, and Structured + Unstructured
--  **Quantization**: Dynamic and Static (both per-tensor symmetric style)
+-  **Quantization**: Dynamic and Static (both per-channel symmetric style)
 
 A more detailed explanation of the project is available in the **project_report.pdf** file present in the root directory of the project.
 
